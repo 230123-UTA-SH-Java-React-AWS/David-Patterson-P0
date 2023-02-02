@@ -5,6 +5,10 @@ public class employee {
     public String password;
     private boolean managerStatus;
 
+
+    public employee(){
+        this.managerStatus = false;
+    }
     public employee(String login, String password){
         this.login = login;
         this.password = password;

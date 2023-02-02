@@ -13,7 +13,7 @@ import com.revature.repository.*;
 //import com.revature.utils.*;
 
 //controller gives strings to services
-public class Services {
+public class Service {
     public Repository repo = new Repository();
 
     public employee CurrentUser;

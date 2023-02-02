@@ -1,4 +1,5 @@
 package com.revature.controllers;
+import com.revature.services.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,11 +10,15 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import com.revature.services.Services;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+
 public class Controller implements HttpHandler{
+
+    private Service serv = new Service();
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String httpVerb = exchange.getRequestMethod();
@@ -44,7 +49,7 @@ public class Controller implements HttpHandler{
     {
         String someResponse = "You selected the get response!";
 
-        //exchange.sendResponseHeaders(200, someResponse.getBytes().length);
+        exchange.sendResponseHeaders(200, someResponse.getBytes().length);
 
         OutputStream os = exchange.getResponseBody();
         os.write(someResponse.getBytes());
@@ -55,7 +60,7 @@ public class Controller implements HttpHandler{
     {
         String someResponse = "You selected the put response!";
 
-        //exchange.sendResponseHeaders(200, someResponse.getBytes().length);
+        exchange.sendResponseHeaders(200, someResponse.getBytes().length);
 
         OutputStream os = exchange.getResponseBody();
         os.write(someResponse.getBytes());
@@ -78,16 +83,19 @@ public class Controller implements HttpHandler{
                 textBuilder.append((char)c);
             }
 
-    
         }
     
         //
-        Services serv = new Services();
+        //String someResponse = "You selected the post response!";
+        exchange.sendResponseHeaders(200, textBuilder.toString().getBytes().length);
+
         serv.insertIntoEmpDatabase(textBuilder.toString());
     
         //exchange.sendResponseHeaders()
+
         OutputStream os = exchange.getResponseBody();
         os.write(textBuilder.toString().getBytes());
         os.close();
+    
     }
 }
