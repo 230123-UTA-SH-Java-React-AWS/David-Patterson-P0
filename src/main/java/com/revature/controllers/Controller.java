@@ -9,20 +9,21 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import javax.xml.ws.spi.http.HttpExchange;
-import javax.xml.ws.spi.http.HttpHandler;
+import com.revature.services.Services;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
-public class Controller extends HttpHandler{
+public class Controller implements HttpHandler{
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String httpVerb = exchange.getRequestMethod();
 
         switch (httpVerb) {
             case "GET":
-                //getRequest(exchange);
+                getRequest(exchange);
                 break;
             case "PUT":
-                //putRequest(exchange);
+                putRequest(exchange);
                 break;
             case "POST":
                 postRequest(exchange);
@@ -31,7 +32,7 @@ public class Controller extends HttpHandler{
                 //You can add implementation details if the user access a http verb not supported at this url
                 String someResponse = "HTTP Verb not supported";
 
-                //exchange.sendResponseHeaders(404, someResponse.getBytes().length);
+                exchange.sendResponseHeaders(404, someResponse.getBytes().length);
                 OutputStream os = exchange.getResponseBody();
                 os.write(someResponse.getBytes());
                 os.close();
@@ -76,10 +77,13 @@ public class Controller extends HttpHandler{
             while ((c = reader.read()) != -1){
                 textBuilder.append((char)c);
             }
+
     
         }
     
         //
+        Services serv = new Services();
+        serv.insertIntoEmpDatabase(textBuilder.toString());
     
         //exchange.sendResponseHeaders()
         OutputStream os = exchange.getResponseBody();

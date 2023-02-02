@@ -1,6 +1,9 @@
 package com.revature.model;
 
+
 public class Ticket {
+    private int ID;//filled by database
+    private String emp;
     private boolean pending; //ture by default
     private boolean approvalStatus; //true = approved, false = denied
     private int amount;
@@ -12,6 +15,26 @@ public class Ticket {
         amount = amt;
         description= desc;
         pending = true;
+    }
+    public Ticket(int ID, String emp, int amt, String desc, boolean pending, boolean approvalStatus){
+        this.ID = ID;
+        this.emp = emp; 
+        amount = amt;
+        description= desc;
+        this.pending = pending;
+        this.approvalStatus = approvalStatus;
+    }
+    public int getID() {
+        return ID;
+    }
+    public void setID(int iD) {
+        ID = iD;
+    }
+    public String getEmp() {
+        return emp;
+    }
+    public void setEmp(String emp) {
+        this.emp = emp;
     }
     //protected? employees shouldn't be able to use these 2
     public void approveTicket(){
