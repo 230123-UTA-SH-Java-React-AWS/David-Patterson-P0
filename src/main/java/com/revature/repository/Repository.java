@@ -38,12 +38,14 @@ public class Repository {
             prstmt.setString(2, password);
             //this one will expect a responce back
             ResultSet result = prstmt.executeQuery();
-                
-            employee emp = new employee(
+            employee emp = null;
+            if(result.next()){
+                emp = new employee(
                                             result.getString(1), 
                                             result.getString(2),
                                             result.getBoolean(3)
                                            );
+            }
             return emp;
 
         } catch (Exception e){

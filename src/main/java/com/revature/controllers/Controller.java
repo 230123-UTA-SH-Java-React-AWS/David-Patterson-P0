@@ -23,6 +23,10 @@ public class Controller implements HttpHandler{
     public void handle(HttpExchange exchange) throws IOException {
         String httpVerb = exchange.getRequestMethod();
 
+        //get = login
+        //post = register
+        //other actions should probably be done by other controllers(maybe figure out how to do that). Alternatively I could make the behaviors change after login, but that would only allow one more get/post action; I'll need more than that.)
+
         switch (httpVerb) {
             case "GET":
                 getRequest(exchange);
@@ -47,7 +51,41 @@ public class Controller implements HttpHandler{
     //Get requests specifically from /someUrl
     public void getRequest(HttpExchange exchange) throws IOException
     {
-        String someResponse = "You selected the get response!";
+        System.out.println("attemting to login...");
+        String someResponse;
+
+        //todo
+        //make this get a login
+        //should this cause a redirect to another controller somehow? 
+        boolean CredentialsCorrect = false;
+        
+        InputStream IS = exchange.getRequestBody();
+        StringBuilder textBuilder = new StringBuilder();
+
+
+       //ASCII
+        //converts our binary to letters
+        //try_resource block will automattically close the resource within the parans when done
+        try (Reader reader = new BufferedReader(new InputStreamReader(IS,Charset.forName(StandardCharsets.UTF_8.name()))))
+        {
+            int c = 0;
+    
+            while ((c = reader.read()) != -1){
+                textBuilder.append((char)c);
+            }
+
+        }
+
+        CredentialsCorrect = serv.login(textBuilder.toString());
+        System.out.println("login atempt complete");
+
+        if(CredentialsCorrect){
+            someResponse = "login success, not that that does anything right now";
+            
+
+        } else {
+            someResponse = "login failure, password or username was incorrect";
+        }
 
         exchange.sendResponseHeaders(200, someResponse.getBytes().length);
 
@@ -69,6 +107,7 @@ public class Controller implements HttpHandler{
 
     //for registering new accounts
     private void postRequest(HttpExchange exchange) throws IOException{
+        System.out.println("sending registration request...");
 
         InputStream IS = exchange.getRequestBody();
         StringBuilder textBuilder = new StringBuilder();
@@ -92,6 +131,8 @@ public class Controller implements HttpHandler{
         serv.insertIntoEmpDatabase(textBuilder.toString());
     
         //exchange.sendResponseHeaders()
+        System.out.println("registration request sent.");
+
 
         OutputStream os = exchange.getResponseBody();
         os.write(textBuilder.toString().getBytes());

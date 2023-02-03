@@ -20,15 +20,35 @@ public class Service {
 
     //employee services
 
-    public void login(String s){
-        //figure out how to get these inputs from the controller
-        String username = "";
-        String password = "";
+    public boolean login(String s){
+        //figure out how to get these inputs from the controller. in the meantime it wil be done as a json string
+        //String username = "";
+        //String password = "";
 
-        this.CurrentUser = repo.login(username, password);
-        if (this.CurrentUser == null){
-            System.out.println("login failed, username or password may be wrong");
+
+        //unsure if its necesary to map it as a json object instead of just making s a username/password, but im not certain how I would do it otherwise
+        ObjectMapper mapper = new ObjectMapper();
+        employee emp;
+        boolean result = false;
+        try {
+            emp = mapper.readValue(s, employee.class);
+            this.CurrentUser = repo.login(emp.getLogin(),emp.getPassword());
+            if (this.CurrentUser == null){
+                System.out.println("login failed, username or password may be wrong");
+                result = false;
+            } else {
+                result = true;
+            }
+        } catch (JsonParseException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return result; 
+
+
 
 
     }
@@ -41,13 +61,10 @@ public class Service {
             emp = mapper.readValue(s, employee.class);
             repo.saveToDatabase(emp);
         } catch (JsonParseException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (JsonMappingException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }        
     }
