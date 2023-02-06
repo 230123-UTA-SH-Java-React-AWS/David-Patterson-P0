@@ -5,9 +5,21 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+//import java.util.PriorityQueue;
+import java.util.LinkedList;
+
 
 public class Repository {
-    public void saveToDatabase(employee emp){
+    public LinkedList<Ticket> PendingTickets = new LinkedList<Ticket>();
+    public boolean ticketsuptodate = true; //used to track if a new ticket has been submitted since the last time the collections above were updated from the database.
+    public List<employee> AllEmps = new ArrayList<employee>();
+    public List<Ticket> UserTickets = new ArrayList<Ticket>();
+    public boolean saveToDatabase(employee emp){
+        AllEmps = getAllEmployees();
+        if(AllEmps.contains(emp)){
+            return false;
+        }
+
         String sql = "insert into users (username, pass, manager) values(?, ?, ?)";
 
         //JDBC API
@@ -23,9 +35,11 @@ public class Repository {
             //prstmt.executeQuery();
             prstmt.execute();
 
-        } catch (Exception e){
+        }catch (Exception e){
             e.printStackTrace();
+            return false;
         }
+        return true;
     }
 
     public employee login(String name, String password){
@@ -55,8 +69,6 @@ public class Repository {
         }
 
     }
-
-
     public List<employee> getAllEmployees(){
         String sql = "select * from users";
 
@@ -86,7 +98,9 @@ public class Repository {
 
 
     //ticket repository methods
+    //keeping this one to return a list instead of a queue
     public List<Ticket> getAllPendingTickets(){
+        this.PendingTickets.clear();
         String sql = "select * from Tickets where pending = true";
 
         List<Ticket> listofPendingTicks = new ArrayList<Ticket>();
@@ -107,23 +121,109 @@ public class Repository {
                                         result.getBoolean(5), 
                                         result.getBoolean(6)
                                         );
-
+                this.PendingTickets.add(tick);
                 listofPendingTicks.add(tick);
             }
 
         } catch (Exception e){
             e.printStackTrace();
         }
+        this.ticketsuptodate = true;
         return listofPendingTicks;
     }
+    
+    public Ticket getNextPendingTicket(){
+        if(this.PendingTickets.isEmpty() || (!ticketsuptodate)){
+            //fills the queue if it's empty or unupdated
+            this.getAllPendingTickets();
+        }
+        //if still empty, peek will return null
+        return this.PendingTickets.peek();
+    }
+    //this one is currently unused
+    public LinkedList<Ticket> getPendingTicketQueue(){
+        if(this.PendingTickets.isEmpty() || (!ticketsuptodate)){
+            //fills the queue if it's empty or unupdated
+            this.getAllPendingTickets();
+        }
+        return this.PendingTickets;
+    }
 
+    public boolean ProccessNextPendingTicket(String status){
 
+        Ticket tick = this.PendingTickets.remove();
+        String sql = "update Tickets";
+        
+        switch (status){
+            case "APPROVE":
+                sql += " set pending = false, approval = true"; //approved tickets cannot possibly be pending
+                break;
+            case "DENY":
+                sql += " set pending = false, approval = false";
+                break;
+            default:
+                return false;//update failed
+        }
+        sql += " where ticketID = ?";
+        try (Connection con = ConnectionUtil.getConnection()) {
+            PreparedStatement prstmt = con.prepareStatement(sql);
 
-    public List<Ticket> getAllUserTickets(employee emp){
+            prstmt.setInt(1, tick.ID);
+            prstmt.execute();
+            this.ticketsuptodate = false;
+
+            tick.approveTicket();//only chages data within this ticket, effectivly does nothing right now
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+    
+
+    public void InsertNewTicket(Ticket NewTick, String username){
+        String sql = "insert into tickets (username, amount, description) values(?, ?, ?)";
+
+        try (Connection con = ConnectionUtil.getConnection()) {
+            PreparedStatement prstmt = con.prepareStatement(sql);
+
+            prstmt.setString(1, username);
+            prstmt.setInt(2, NewTick.getAmount());
+            prstmt.setString(3, NewTick.getDescription());
+            prstmt.execute();
+            this.ticketsuptodate = false;
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+/*     public List<Ticket> getAllUserTickets(employee emp, String filter){
+        if(this.UserTickets.isEmpty() || (!ticketsuptodate)){
+            //fills the queue if it's empty or unupdated
+            this.FillAllUserTickets(emp, filter);
+        }
+        //if still empty, peek will return null
+        return this.UserTickets;
+    }
+*/
+    public List<Ticket> getAllUserTickets(employee emp, String filter){
+        this.UserTickets.clear();
         String sql = "select * from Tickets where username = ?";
 
-        List<Ticket> listofPendingTicks = new ArrayList<Ticket>();
-
+        switch (filter){
+            case "PENDING":
+                sql += " and pending = true";
+                break;
+            case "APPROVED":
+                sql += " and approval = true"; //approved tickets cannot possibly be pending
+                break;
+            case "DENIED":
+                sql += " and pending = false and approval = false";
+                break;
+            default:
+        }
         try (Connection con = ConnectionUtil.getConnection()) {
 
             PreparedStatement prstmt = con.prepareStatement(sql);
@@ -142,14 +242,15 @@ public class Repository {
                                         result.getBoolean(5), 
                                         result.getBoolean(6)
                                         );
+                this.UserTickets.add(tick);
 
-                listofPendingTicks.add(tick);
+                //listofTicks.add(tick);
             }
 
         } catch (Exception e){
             e.printStackTrace();
         }
-        return listofPendingTicks;
+        return this.UserTickets;
     }
     
 }

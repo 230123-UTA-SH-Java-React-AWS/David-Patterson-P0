@@ -25,7 +25,14 @@
         <accessrule kind="accessible" pattern="**/javafx/**"/>
     </accessrules>
   </classpathentry>
-  <dependencies> 
+  <dependencies>
+              <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.10.19</version>
+      <scope>test</scope>
+    </dependency>
               <!-- https://mvnrepository.com/artifact/com.sun.net.httpserver/http -->
     <dependency>
       <groupId>com.sun.net.httpserver</groupId>

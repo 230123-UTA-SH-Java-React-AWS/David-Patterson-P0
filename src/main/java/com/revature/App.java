@@ -1,7 +1,8 @@
 package com.revature;
+import com.revature.services.*;
 import com.sun.net.httpserver.*;
 import com.sun.net.httpserver.HttpServer;
-import com.revature.controllers.Controller;
+import com.revature.controllers.*;
 import java.net.InetSocketAddress;
 
 
@@ -20,7 +21,7 @@ public final class App {
         //HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         //System.out.println("Hello World!");
         //employee emp1 = new employee("emp3", "pass3");
-        //Services serv = new Services();
+        Service serv = new Service();
 
         //serv.repo.saveToDatabase(emp1);
 
@@ -29,8 +30,12 @@ public final class App {
 
         //HttpServer server;
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
-        server.createContext("/someURL",  (HttpHandler) new Controller());
-        //server.createContext("/otherURL", (HttpHandler) new AnotherController());
+
+        //serv used to retain logged user
+        server.createContext("/Login",  (HttpHandler) new LoginController(serv));
+        server.createContext("/MyTickets", (HttpHandler) new EmployeeTicketController(serv));
+        server.createContext("/TicketProcessing", (HttpHandler) new ManagerTicketController(serv));
+        server.createContext("/Logout",  (HttpHandler) new LogoutController(serv));
 
 
         server.setExecutor(null);

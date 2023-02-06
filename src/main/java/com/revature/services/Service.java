@@ -17,6 +17,7 @@ public class Service {
     public Repository repo = new Repository();
 
     public employee CurrentUser;
+    public boolean loggedIn = false;
 
     //employee services
 
@@ -46,6 +47,10 @@ public class Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if(result){
+            this.loggedIn = true;
+        }
         return result; 
 
 
@@ -54,36 +59,124 @@ public class Service {
     }
 
     //aka register a new employee account
-    public void insertIntoEmpDatabase(String s){
+    public boolean insertIntoEmpDatabase(String s) {
         ObjectMapper mapper = new ObjectMapper();
         employee emp;
+        boolean success = false;
         try {
             emp = mapper.readValue(s, employee.class);
-            repo.saveToDatabase(emp);
+            success = repo.saveToDatabase(emp);
         } catch (JsonParseException e) {
             e.printStackTrace();
         } catch (JsonMappingException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }        
+        }
+        return success;   
     }
 
+    //needs to return a string if It ever goes to the controller
     public List<employee> getAllEmpolyees(){
         return repo.getAllEmployees();
     }
 
 
     //ticket services
-
+    //processing
+    //do we ever need ALL of them? 
+    //needs to return a string if It ever goes to the controller
     public List<Ticket> getAllPendingTickets(){
-        return repo.getAllPendingTickets();
+        if(this.loggedIn){
+            if(this.CurrentUser.isManager()){
+                return repo.getAllPendingTickets();
+            } else {
+                System.out.println("must be a manager to perform this action");
+                return null;
+            }
+        } else {
+            System.out.println("must log in to perform this action");
+            return null;
+        }
 
     }
-    public List<Ticket> getAllUserTickets(employee emp){
-        return repo.getAllUserTickets(emp);
+    //just the top priority one
+
+    public String getNextPendingTicket(){
+        if(this.loggedIn){
+            if(this.CurrentUser.isManager()){
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString;
+                try {
+                    jsonString = mapper.writeValueAsString(repo.getNextPendingTicket());
+                    return jsonString;
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            } else {
+                System.out.println("must be a manager to perform this action");
+                return "must be a manager to perform this action";
+            }
+        } else {
+            System.out.println("must log in to perform this action");
+            return "must log in to perform this action";
+        }
+
+    }
+    public boolean ProccessNextPendingTicket(String status){
+
+        return (repo.ProccessNextPendingTicket(status));
 
     }
 
-    
+
+
+    //user tickets
+    public void SubmitNewTicket(String s){
+        if(this.loggedIn){
+            ObjectMapper mapper = new ObjectMapper();
+            Ticket NewTick;
+            try {
+                NewTick = mapper.readValue(s, Ticket.class);
+                repo.InsertNewTicket(NewTick, this.CurrentUser.login);
+            } catch (JsonParseException e) {
+                e.printStackTrace();
+            } catch (JsonMappingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }        
+        }
+    }
+    public String getAllUserTickets(String statusFilter){
+        if(this.loggedIn){
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonString;
+            try {
+                jsonString = mapper.writeValueAsString(repo.getAllUserTickets(this.CurrentUser, statusFilter));
+                return jsonString;
+            } catch (JsonParseException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JsonMappingException e) {
+                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }    
+
+        } else {
+            System.out.println("must log in to perform this action");
+            return "must log in to perform this action";
+        }
+
+    }
 }

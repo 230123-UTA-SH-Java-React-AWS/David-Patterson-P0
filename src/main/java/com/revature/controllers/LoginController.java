@@ -9,16 +9,21 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 
-public class Controller implements HttpHandler{
+public class LoginController implements HttpHandler{
 
-    private Service serv = new Service();
+    private Service serv;
 
+    public LoginController(){
+        this.serv = null;
+    }
+    public LoginController(Service serv){
+        this.serv = serv;
+    }
+    
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String httpVerb = exchange.getRequestMethod();
@@ -49,14 +54,11 @@ public class Controller implements HttpHandler{
         }
     }
     //Get requests specifically from /someUrl
-    public void getRequest(HttpExchange exchange) throws IOException
+    //login
+    private void getRequest(HttpExchange exchange) throws IOException
     {
         System.out.println("attemting to login...");
         String someResponse;
-
-        //todo
-        //make this get a login
-        //should this cause a redirect to another controller somehow? 
         boolean CredentialsCorrect = false;
         
         InputStream IS = exchange.getRequestBody();
@@ -80,7 +82,7 @@ public class Controller implements HttpHandler{
         System.out.println("login atempt complete");
 
         if(CredentialsCorrect){
-            someResponse = "login success, not that that does anything right now";
+            someResponse = "login success.";
             
 
         } else {
@@ -93,8 +95,8 @@ public class Controller implements HttpHandler{
         os.write(someResponse.getBytes());
         os.close();
     }
-
-    public void putRequest(HttpExchange exchange) throws IOException
+    //does nothing, just here for my own reference
+    private void putRequest(HttpExchange exchange) throws IOException
     {
         String someResponse = "You selected the put response!";
 
@@ -104,7 +106,6 @@ public class Controller implements HttpHandler{
         os.write(someResponse.getBytes());
         os.close();
     }
-
     //for registering new accounts
     private void postRequest(HttpExchange exchange) throws IOException{
         System.out.println("sending registration request...");
@@ -126,11 +127,16 @@ public class Controller implements HttpHandler{
     
         //
         //String someResponse = "You selected the post response!";
-        exchange.sendResponseHeaders(200, textBuilder.toString().getBytes().length);
+        boolean success;
+        success = serv.insertIntoEmpDatabase(textBuilder.toString());
+        String response = textBuilder.toString();
+        if(!success){
+            response = "registration failed, username might be taken";
+        }
 
-        serv.insertIntoEmpDatabase(textBuilder.toString());
     
         //exchange.sendResponseHeaders()
+        exchange.sendResponseHeaders(200, response.getBytes().length);
         System.out.println("registration request sent.");
 
 

@@ -2,23 +2,28 @@ package com.revature.model;
 
 
 public class Ticket {
-    private int ID;//filled by database
-    private String emp;
+    public int ID;//filled by database
+    private String employee;
     private boolean pending; //ture by default
     private boolean approvalStatus; //true = approved, false = denied
     private int amount;
     private String description;
 
 
-
-    public Ticket(int amt, String desc){
+    public Ticket(){
+        ID = -1;
+        employee = "";
+        pending = true;
+        approvalStatus = false;
+    }
+    public Ticket( int amt, String desc){
         amount = amt;
         description= desc;
         pending = true;
     }
     public Ticket(int ID, String emp, int amt, String desc, boolean pending, boolean approvalStatus){
         this.ID = ID;
-        this.emp = emp; 
+        this.employee = emp; 
         amount = amt;
         description= desc;
         this.pending = pending;
@@ -31,10 +36,10 @@ public class Ticket {
         ID = iD;
     }
     public String getEmp() {
-        return emp;
+        return employee;
     }
     public void setEmp(String emp) {
-        this.emp = emp;
+        this.employee = emp;
     }
     //protected? employees shouldn't be able to use these 2
     public void approveTicket(){
