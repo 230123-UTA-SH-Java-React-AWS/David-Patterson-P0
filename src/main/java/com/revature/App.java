@@ -35,6 +35,7 @@ public final class App {
         server.createContext("/Login",  (HttpHandler) new LoginController(serv));
         server.createContext("/MyTickets", (HttpHandler) new EmployeeTicketController(serv));
         server.createContext("/TicketProcessing", (HttpHandler) new ManagerTicketController(serv));
+        server.createContext("/AllTicketProcessing", (HttpHandler) new AllPendingTicketController(serv));
         server.createContext("/Logout",  (HttpHandler) new LogoutController(serv));
 
 

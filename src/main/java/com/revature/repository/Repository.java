@@ -168,7 +168,7 @@ public class Repository {
         try (Connection con = ConnectionUtil.getConnection()) {
             PreparedStatement prstmt = con.prepareStatement(sql);
 
-            prstmt.setInt(1, tick.ID);
+            prstmt.setInt(1, tick.getID());
             prstmt.execute();
             this.ticketsuptodate = false;
 

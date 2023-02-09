@@ -13,14 +13,13 @@ import java.io.OutputStream;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
-public class ManagerTicketController implements HttpHandler{
+public class AllPendingTicketController implements HttpHandler{
     private Service serv;
 
-    public ManagerTicketController(){
+    public AllPendingTicketController(){
         this.serv = null;
     }
-    public ManagerTicketController(Service serv){
+    public AllPendingTicketController(Service serv){
         this.serv = serv;
     }
 
@@ -34,9 +33,6 @@ public class ManagerTicketController implements HttpHandler{
         switch (httpVerb) {
             case "GET":
                 getRequest(exchange);
-                break;
-            case "PUT":
-                putRequest(exchange);
                 break;
             default:
                 //You can add implementation details if the user access a http verb not supported at this url
@@ -58,7 +54,7 @@ public class ManagerTicketController implements HttpHandler{
         if(this.serv.loggedIn && this.serv.CurrentUser.isManager()){
             someResponse = "Next pending ticket: ";
             String next;
-            next = serv.getNextPendingTicket();
+            next = serv.getAllPendingTickets();
             someResponse += next;
             if (next.isEmpty()){
                 someResponse = "no pending tickets to proccess";
@@ -73,31 +69,4 @@ public class ManagerTicketController implements HttpHandler{
         os.write(someResponse.getBytes());
         os.close();
     }
-    //approve or deny top pending ticket
-    private void putRequest(HttpExchange exchange) throws IOException
-    {
-        String status = exchange.getRequestHeaders().get("input").get(0);
-        String someResponse = "You selected the put response!";
-
-        if(this.serv.loggedIn && this.serv.CurrentUser.isManager()){
-            someResponse = "Ticket Proccessed: ";
-            String next;
-            next = serv.getNextPendingTicket();
-            someResponse += next;
-            boolean success = serv.ProccessNextPendingTicket(status);
-            if(!success){
-                someResponse = "proccessing failed";
-            } else if (next.isEmpty()){
-                someResponse = "no pending tickets to proccess";
-            }
-        } else {
-            someResponse = "please login to manager account to perform this action";
-        }
-        exchange.sendResponseHeaders(200, someResponse.getBytes().length);
-
-        OutputStream os = exchange.getResponseBody();
-        os.write(someResponse.getBytes());
-        os.close();
-    }
-
 }

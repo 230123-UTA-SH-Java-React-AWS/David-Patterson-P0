@@ -86,10 +86,25 @@ public class Service {
     //processing
     //do we ever need ALL of them? 
     //needs to return a string if It ever goes to the controller
-    public List<Ticket> getAllPendingTickets(){
+    public String getAllPendingTickets(){
         if(this.loggedIn){
             if(this.CurrentUser.isManager()){
-                return repo.getAllPendingTickets();
+                ObjectMapper mapper = new ObjectMapper();
+                String jsonString;
+                try {
+                    jsonString = mapper.writeValueAsString(repo.getAllPendingTickets());
+                    return jsonString;
+                } catch (JsonParseException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (JsonMappingException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                
             } else {
                 System.out.println("must be a manager to perform this action");
                 return null;

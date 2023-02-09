@@ -127,7 +127,7 @@ public class LoginController implements HttpHandler{
     
         //
         //String someResponse = "You selected the post response!";
-        boolean success;
+        boolean success = false;
         success = serv.insertIntoEmpDatabase(textBuilder.toString());
         String response = textBuilder.toString();
         if(!success){

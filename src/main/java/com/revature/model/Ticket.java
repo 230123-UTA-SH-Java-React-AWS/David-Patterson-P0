@@ -2,7 +2,7 @@ package com.revature.model;
 
 
 public class Ticket {
-    public int ID;//filled by database
+    private int ID;//filled by database
     private String employee;
     private boolean pending; //ture by default
     private boolean approvalStatus; //true = approved, false = denied
